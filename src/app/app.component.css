@@ -1,0 +1,40 @@
+td {
+  max-width: 50rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+td:hover {
+  overflow: visible;
+}
+
+.table-item-url {
+  z-index: 9;
+}
+
+/* .table-header {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #000000;
+  display: inline-block;
+}
+
+.table-header-item {
+  display: inline-block;
+}
+
+.table-column-item {
+  display: inline-block;
+  margin-left: 1rem;
+  max-width: 100rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-column-item:hover {
+  overflow: visible;
+}
+
+.table-column-item-btn {
+  margin-left: 1rem;
+} */
