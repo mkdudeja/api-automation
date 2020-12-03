@@ -13,6 +13,14 @@ td:hover {
   z-index: 9;
 }
 
+.buttons-container {
+  margin-top: 1rem;
+}
+
+.buttons-container > button {
+  margin-right: 1rem;
+}
+
 /* .table-header {
   margin-bottom: 1rem;
   border-bottom: 1px solid #000000;

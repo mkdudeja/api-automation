@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, QueryList, TemplateRef, ViewChildren } from '@angular/core';
 import { HARDataSource } from './HAR_Data';
 
 interface IRequest extends chrome.devtools.network.Request {
   _resourceType: string;
+  selected: boolean;
 }
 
 @Component({
@@ -11,27 +12,51 @@ interface IRequest extends chrome.devtools.network.Request {
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
+
   title = 'APIAutomation';
-  dataSource: Array<IRequest> = [];
-  apiRequests = HARDataSource.filter(apiRequest => apiRequest._resourceType === 'xhr');
+  // dataSource: Array<IRequest> = [];
+  apiRequests: any[] = HARDataSource.filter(apiRequest => apiRequest._resourceType === 'xhr');
+  isAnyRequestSelected = false;
 
   ngOnInit() {
-    // chrome.devtools.network.onRequestFinished.addListener(
-    //   (request: IRequest) => {
-    //     if (request._resourceType === 'xhr') {
-    //       request.getContent((content: string, encoding: string) => {
-    //         request.response.content.text = content;
-    //         this.dataSource.push(request);
-    //         console.log('this.dataSource', this.dataSource);
-    //       });
-    //     }
-    //   }
-    // );
-    console.log(this.apiRequests);
+    this.apiRequests.forEach((apiRequest, i) => {
+      apiRequest.selected = false;
+    });
 
+    chrome.devtools.network.onRequestFinished.addListener(
+      (request: IRequest) => {
+        if (request._resourceType === 'xhr') {
+          request.getContent((content: string, encoding: string) => {
+            request.response.content.text = content;
+            this.apiRequests.push(request);
+            console.log('this.apiRequests', this.apiRequests);
+          });
+        }
+      }
+    );
   }
 
-  public generateScript(request) {
+  public selectRequest(request: IRequest) {
+    request.selected = !request.selected;
+    this.isAnyRequestSelected = this.apiRequests && this.apiRequests.filter(apiRequest => apiRequest.selected).length > 0 ? true : false;
+  }
+
+  public generateScript(
+    request: IRequest,
+    data: string = 'hello world...',
+    filename: string = `${new Date().toDateString()}.txt`
+  ) {
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+    // chrome.downloads.download({ url: URL.createObjectURL(blob), filename });
     console.log(request);
+  }
+
+  public generateSelectedScript() {
+    const selectedApis = this.apiRequests.filter(apiRequest => apiRequest.selected);
+    console.log(selectedApis);
+  }
+
+  public generateAllScript() {
+    console.log(this.apiRequests);
   }
 }

@@ -1,29 +1,22 @@
 <div>
-  <!-- <div class="table-header">
-    <div class="table-header-item">Select</div>
-    <div class="table-header-item">Method</div>
-    <div class="table-header-item">Url</div>
-  </div>
-  <div class="table-row" *ngFor="let apiRequest of apiRequests">
-    <input type="checkbox">
-    <div class="table-column-item">{{apiRequest.request.method}}</div>
-    <div class="table-column-item">{{apiRequest.request.url}}</div>
-    <button type="button" (click)="generateScript(apiRequest)" class="table-column-item-btn">Generate script</button>
-  </div> -->
-
   <table>
     <tr>
-      <th>Select</th>
+      <th></th>
       <th>Method</th>
       <th>URL</th>
     </tr>
     <tr *ngFor="let apiRequest of apiRequests">
       <td>
-        <input type="checkbox">
+        <input type="checkbox" [ngModel]="apiRequest.selected" (change)="selectRequest(apiRequest)">
       </td>
       <td>{{apiRequest.request.method}}</td>
       <td class="table-item-url">{{apiRequest.request.url}}</td>
       <td><button type="button" (click)="generateScript(apiRequest)" class="table-column-item-btn">Generate script</button></td>
     </tr>
   </table>
+
+  <div class="buttons-container">
+    <button type="button" (click)="generateSelectedScript()" [disabled]="!isAnyRequestSelected">Generate selected scripts</button>
+    <button type="button" (click)="generateAllScript()">Generate all scripts</button>
+  </div>
 </div>
