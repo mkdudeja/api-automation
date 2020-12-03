@@ -25,7 +25,9 @@
               "src/background.js",
               "src/manifest.json",
               "src/wifi_network.png",
-              "src/wifi_network_active.png"
+              "src/wifi_network_active.png",
+              "src/devtoolsBackground.js",
+              "src/devtoolsBackground.html"
             ],
             "styles": ["src/styles.css"],
             "scripts": []

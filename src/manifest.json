@@ -1,17 +1,15 @@
 {
+  "version": "0.0.1",
   "manifest_version": 2,
   "name": "API Test Case Automation",
   "description": "Chrome extention to automate API test cases generation",
-  "version": "0.0.1",
+  "devtools_page": "devtoolsBackground.html",
+  "permissions": ["tabs", "*://*/*", "webRequest", "storage"],
   "icons": {
     "128": "wifi_network_active.png"
   },
-  "permissions": ["tabs", "*://*/*", "webRequest", "storage"],
   "browser_action": {
     "default_icon": "wifi_network.png",
     "default_title": "API Test Case Automation"
-  },
-  "background": {
-    "scripts": ["background.js"]
   }
 }
