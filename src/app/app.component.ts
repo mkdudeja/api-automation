@@ -26,4 +26,12 @@ export class AppComponent implements OnInit {
       }
     );
   }
+
+  download(
+    data: string = 'hello world...',
+    filename: string = `${new Date().toDateString()}.txt`
+  ) {
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+    chrome.downloads.download({ url: URL.createObjectURL(blob), filename });
+  }
 }
