@@ -1,4 +1,13 @@
-import { Component, ElementRef, OnInit, QueryList, TemplateRef, ViewChildren } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  NgZone,
+  OnInit,
+  QueryList,
+  TemplateRef,
+  ViewChildren,
+} from '@angular/core';
+import { Subject, Subscription } from 'rxjs';
 import { HARDataSource } from './HAR_Data';
 
 interface IRequest extends chrome.devtools.network.Request {
@@ -12,6 +21,7 @@ interface IRequest extends chrome.devtools.network.Request {
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
+  constructor(private ngZone: NgZone) {}
 
   title = 'APIAutomation';
   apiRequests: Array<IRequest> = [];
@@ -25,8 +35,10 @@ export class AppComponent implements OnInit {
           request.getContent((content: string, encoding: string) => {
             request.response.content.text = content;
             request.selected = false;
-            this.apiRequests.push(request);
-            console.log('this.apiRequests', this.apiRequests);
+            this.ngZone.run(() => {
+              this.apiRequests.push(request);
+              console.log('this.apiRequests', this.apiRequests);
+            });
           });
         }
       }
@@ -35,7 +47,11 @@ export class AppComponent implements OnInit {
 
   public selectRequest(request: IRequest) {
     request.selected = !request.selected;
-    this.isAnyRequestSelected = this.apiRequests && this.apiRequests.filter(apiRequest => apiRequest.selected).length > 0 ? true : false;
+    this.isAnyRequestSelected =
+      this.apiRequests &&
+      this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0
+        ? true
+        : false;
   }
 
   public generateScript(
@@ -48,7 +64,9 @@ export class AppComponent implements OnInit {
   }
 
   public generateSelectedScript() {
-    const selectedApis = this.apiRequests.filter(apiRequest => apiRequest.selected);
+    const selectedApis = this.apiRequests.filter(
+      (apiRequest) => apiRequest.selected
+    );
     console.log(selectedApis);
   }
 
