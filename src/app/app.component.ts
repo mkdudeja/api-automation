@@ -14,20 +14,17 @@ interface IRequest extends chrome.devtools.network.Request {
 export class AppComponent implements OnInit {
 
   title = 'APIAutomation';
-  // dataSource: Array<IRequest> = [];
-  apiRequests: any[] = HARDataSource.filter(apiRequest => apiRequest._resourceType === 'xhr');
+  apiRequests: Array<IRequest> = [];
+  // apiRequests: any[] = HARDataSource.filter(apiRequest => apiRequest._resourceType === 'xhr');
   isAnyRequestSelected = false;
 
   ngOnInit() {
-    this.apiRequests.forEach((apiRequest, i) => {
-      apiRequest.selected = false;
-    });
-
     chrome.devtools.network.onRequestFinished.addListener(
       (request: IRequest) => {
         if (request._resourceType === 'xhr') {
           request.getContent((content: string, encoding: string) => {
             request.response.content.text = content;
+            request.selected = false;
             this.apiRequests.push(request);
             console.log('this.apiRequests', this.apiRequests);
           });
@@ -47,8 +44,7 @@ export class AppComponent implements OnInit {
     filename: string = `${new Date().toDateString()}.txt`
   ) {
     const blob = new Blob([data], { type: 'application/octet-stream' });
-    // chrome.downloads.download({ url: URL.createObjectURL(blob), filename });
-    console.log(request);
+    chrome.downloads.download({ url: URL.createObjectURL(blob), filename });
   }
 
   public generateSelectedScript() {
