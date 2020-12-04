@@ -4,13 +4,16 @@ export const GETMETHODTEMPLATE = `
         {
             var expectedResponse = @"[[JSONResponseContent]]";
 
+            var apiUrl = "[[ApiUrl]]";
+            [[DestinationDependencyLogic]]
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            HttpResponseMessage responseMessage = await Client.GetAsync("[[ApiUrl]]");
+            HttpResponseMessage responseMessage = await Client.GetAsync(apiUrl);
 
             Assert.IsTrue(responseMessage.IsSuccessStatusCode);
             var actualResponse = await responseMessage.Content.ReadAsStringAsync();
-            Assert.IsTrue(IsJsonStructureSame(actualResponse, expectedResponse));
+            Assert.IsTrue(IsJsonEqual(actualResponse, expectedResponse));
             SetCookies(responseMessage);
+            [[SourceDependencyLogic]]
         }
 
 `;
@@ -22,14 +25,25 @@ export const POSTMETHODTEMPLATE = `
 
             var expectedResponse = @"[[JSONResponseContent]]";
 
+            var apiUrl = "[[ApiUrl]]";
+            [[DestinationDependencyLogic]]
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            HttpResponseMessage responseMessage = await Client.PostAsync("[[ApiUrl]]" , new StringContent(requestJson, Encoding.UTF8, "application/json"));
+            HttpResponseMessage responseMessage = await Client.PostAsync(apiUrl, new StringContent(requestJson, Encoding.UTF8, "application/json"));
 
             Assert.IsTrue(responseMessage.IsSuccessStatusCode);
             var actualResponse = await responseMessage.Content.ReadAsStringAsync();
-            Assert.IsTrue(IsJsonStructureSame(actualResponse, expectedResponse));
+            Assert.IsTrue(IsJsonEqual(actualResponse, expectedResponse));
             SetCookies(responseMessage);
+            [[SourceDependencyLogic]]
         }
+`;
+
+export const SOURCEDEPENDECYTEMPLATE = `
+            SetVariable(responseMessage, "[[SOURCE_TYPE]]", "[[SOURCE_PROP_NAME]]");
+`;
+
+export const DESTINATIONDEPENDECYTEMPLATE = `
+            apiUrl = SetRequest(apiUrl, "[[DESTINATION_TYPE]]", "[[DESTINATION_PROP_NAME]]", "[[SOURCE_PROP_NAME]]");
 `;
 
 export const TESTCLASSTEMPLATE = `using NUnit.Framework;
@@ -76,27 +90,11 @@ namespace ApiTests
 
         [[TEST_CASES]]
 
-        private bool IsJsonStructureSame(string expectedResponse, string actualResponse)
+        private bool IsJsonEqual(string expectedResponse, string actualResponse)
         {
-            JObject expectedResponseObject = JObject.Parse(actualResponse);
+            JObject expectedResponseObject = JObject.Parse(expectedResponse);
             JObject actualResponseObject = JObject.Parse(actualResponse);
             return JToken.DeepEquals(actualResponseObject, expectedResponseObject);
-        }
-
-        private string SetSessionId(string uri)
-        {
-            Uri urid = new Uri(hostUrl);
-            var s = cookies.GetCookies(urid);
-            string sessionId = s[0].Value;
-
-            if (uri.IndexOf('?') > -1)
-            {
-                return uri += "&sessionId=" + sessionId;
-            }
-            else
-            {
-                return uri += "?sessionId=" + sessionId;
-            }
         }
 
         private void SetCookies(HttpResponseMessage responseMessage)
@@ -110,6 +108,16 @@ namespace ApiTests
                     this.cookies.SetCookies(urid, cookie);
                 });
             }
+        }
+
+        private string SetRequest(string apiUrl, string type, string destinationPropName, string sourceVariableName)
+        {
+            return apiUrl;
+        }
+
+        private void SetVariable(HttpResponseMessage response, string type, string propName)
+        {
+
         }
 
     }

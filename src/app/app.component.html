@@ -78,7 +78,7 @@
       </tbody>
     </table>
 
-    <h3 *ngIf="!apiRequests || !apiRequests.length">No requests are triggered yet</h3>
+    <h3 *ngIf="!apiRequests || !apiRequests.length" class="no-requests">No requests are triggered yet</h3>
 
     <div class="buttons-container" *ngIf="apiRequests && apiRequests.length">
       <button type="button" (click)="generateSelectedScript()" [disabled]="!isAnyRequestSelected">Generate for selected</button>
