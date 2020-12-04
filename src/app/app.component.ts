@@ -1,20 +1,10 @@
+import { Component, NgZone, OnInit } from '@angular/core';
+import { IRequest } from './app.interface';
 import {
-  Component,
-  ElementRef,
-  NgZone,
-  OnInit,
-  QueryList,
-  TemplateRef,
-  ViewChildren,
-} from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
-import { HARDataSource } from './HAR_Data';
-import { getMethodTemplate, postMethodTemplate, testClassTemplate} from './test-template'
-
-interface IRequest extends chrome.devtools.network.Request {
-  _resourceType: string;
-  selected: boolean;
-}
+  getMethodTemplate,
+  postMethodTemplate,
+  testClassTemplate,
+} from './test-template';
 
 @Component({
   selector: 'app-root',
@@ -38,7 +28,6 @@ export class AppComponent implements OnInit {
             request.selected = false;
 
             // processing the calls
-
             this.ngZone.run(() => {
               this.apiRequests.push(request);
               console.log('this.apiRequests', this.apiRequests);
@@ -58,9 +47,7 @@ export class AppComponent implements OnInit {
         : false;
   }
 
-  public generateScript(
-    request: IRequest
-  ) {
+  public generateScript(request: IRequest) {
     // const blob = new Blob([data], { type: 'application/octet-stream' });
     // chrome.downloads.download({ url: URL.createObjectURL(blob), filename });
     this._generateScripts([request]);
@@ -82,10 +69,10 @@ export class AppComponent implements OnInit {
   private _generateScripts(requests: IRequest[]) {
     let generatedMethods = '';
     let baseUrl = '';
-    for(let i = 0; i < requests.length; i++) {
+    for (let i = 0; i < requests.length; i++) {
       const apiRequest = requests[i];
 
-      let method : string;
+      let method: string;
       if (apiRequest.request.method === 'GET') {
         method = getMethodTemplate;
       } else {
@@ -96,7 +83,7 @@ export class AppComponent implements OnInit {
         baseUrl = apiRequest.request.url.split('/api')[0] + '/';
       }
 
-      method = method.replace('[[Order]]', (i+1).toString());
+      method = method.replace('[[Order]]', (i + 1).toString());
       const urlParts = apiRequest.request.url.split('/'); // exclude query param?
 
       let testName = urlParts[urlParts.length - 1];
@@ -106,15 +93,24 @@ export class AppComponent implements OnInit {
 
       method = method.replace('[[TestName]]', testName);
 
-      let content = apiRequest.request.postData ? apiRequest.request.postData.text : '';
+      let content = apiRequest.request.postData
+        ? apiRequest.request.postData.text
+        : '';
       content = content.replace(/\"/g, '""');
       method = method.replace('[[JSONRequestContent]]', content);
 
-      content = apiRequest.response.content ? apiRequest.response.content.text : '';
+      content = apiRequest.response.content
+        ? apiRequest.response.content.text
+        : '';
       content = content.replace(/\"/g, '""');
       method = method.replace('[[JSONResponseContent]]', content);
 
-      method = method.replace('[[ApiUrl]]', baseUrl ? apiRequest.request.url.replace(baseUrl, ''): apiRequest.request.url);
+      method = method.replace(
+        '[[ApiUrl]]',
+        baseUrl
+          ? apiRequest.request.url.replace(baseUrl, '')
+          : apiRequest.request.url
+      );
 
       generatedMethods += method;
     }
@@ -124,6 +120,9 @@ export class AppComponent implements OnInit {
     testClass = testClass.replace('[[TEST_CASES]]', generatedMethods);
 
     const blob = new Blob([testClass], { type: 'application/octet-stream' });
-    chrome.downloads.download({ url: URL.createObjectURL(blob), filename: 'AutoApiTestClass.cs' });
+    chrome.downloads.download({
+      url: URL.createObjectURL(blob),
+      filename: 'AutoApiTestClass.cs',
+    });
   }
 }
