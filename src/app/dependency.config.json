@@ -1,0 +1,32 @@
+{
+  "account/login": {
+    "response": {
+      "content": [
+        {
+          "name": "SessionId",
+          "saveAs": {
+            "name": "Authorization",
+            "source": "HEADER",
+            "validateTime": 1,
+            "applyToCall": 2
+          }
+        }
+      ]
+    }
+  },
+  "GetAntiForgeryTokens": {
+    "response": {
+      "cookies": [
+        {
+          "name": "XSRF-TOKEN",
+          "saveAs": {
+            "name": "X-XSRF-TOKEN",
+            "source": "HEADER",
+            "timeCheck": 1,
+            "applyToCallOfType": 1
+          }
+        }
+      ]
+    }
+  }
+}

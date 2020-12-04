@@ -1,1 +1,50 @@
 /* You can add global styles to this file, and also import other style files */
+*,
+:after,
+:before {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+}
+
+.flex {
+  display: flex;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.container {
+  width: 100%;
+  /* padding: 1rem; */
+  overflow: hidden;
+  border-bottom: 1px solid #cccccc;
+  height: 100%;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
