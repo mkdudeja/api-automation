@@ -1,12 +1,12 @@
 import { Component, NgZone, OnInit } from '@angular/core';
-import { IDependencySourceFlat, IDependencyDestinationFlat, IRequest } from './app.interface';
+import { IDependencySourceFlat, IDependencyDestinationFlat, IRequest, TabOptions } from './app.interface';
 import { dependencyMap } from './dependency.config';
 import {
-  getMethodTemplate,
-  postMethodTemplate,
-  sourceDependecyTemplate,
-  destinationDependecyTemplate,
-  testClassTemplate,
+  GETMETHODTEMPLATE,
+  POSTMETHODTEMPLATE,
+  SOURCEDEPENDECYTEMPLATE,
+  DESTINATIONDEPENDECYTEMPLATE,
+  TESTCLASSTEMPLATE,
 } from './test-template';
 
 @Component({
@@ -15,20 +15,35 @@ import {
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  constructor(private ngZone: NgZone) { }
+
+  constructor(private ngZone: NgZone) {}
 
   title = 'APIAutomation';
+  getMethodTemplate: string = null;
+  postMethodTemplate: string = null;
+  testClassTemplate: string = null;
   apiRequests: Array<IRequest> = [];
   // apiRequests: any[] = HARDataSource.filter(apiRequest => apiRequest._resourceType === 'xhr');
   isAnyRequestSelected = false;
+  leftPanelCollapsed: boolean = true;
+  selectedTab: string = 'templates';
+  templateValue: string = null;
+
+  tabOptions: TabOptions[] = [
+    { name: 'Templates', id: "templates" },
+    { name: 'Config', id: "config" },
+    { name: 'Settings', id: "settings" }
+  ]
 
   sourceDependecies: IDependencySourceFlat[];
   destinationDependecies: IDependencyDestinationFlat[];
 
   ngOnInit() {
+    this.checkForTemplates();
+
     chrome.devtools.network.onRequestFinished.addListener(
       (request: IRequest) => {
-        if (request._resourceType === 'xhr') {
+        if (request._resourceType === 'xhr' && !request.request.url.includes('sockjs-node')) {
           request.getContent((content: string, encoding: string) => {
             request.response.content.text = content;
             request.selected = false;
@@ -44,46 +59,73 @@ export class AppComponent implements OnInit {
     );
   }
 
+  private checkForTemplates() {
+    chrome.storage.local.get(['getMethodTemplate'], (result) => {
+      this.getMethodTemplate = result.key || GETMETHODTEMPLATE;
+      console.log(this.getMethodTemplate);
+    });
+
+    chrome.storage.local.get(['postMethodTemplate'], (result) => {
+      this.postMethodTemplate = result.key || POSTMETHODTEMPLATE;
+    });
+
+    chrome.storage.local.get(['testClassTemplate'], (result) => {
+      this.testClassTemplate = result.key || TESTCLASSTEMPLATE;
+    });
+  }
+
+  public clearAllRequests() {
+
+  }
+
+  public templateTypeChange(templateType: string) {
+    console.log(templateType);
+    chrome.storage.local.get([templateType], (result) => {
+      this[templateType] = result.key || this[templateType];
+    })
+  }
+
+  public saveTemplate(templateValue: string, templateType: string) {
+    if (templateValue) {
+      chrome.storage.local.set({templateType: templateValue}, function() {
+        console.log('Value is set to ' + templateValue + ' for ' + templateValue);
+        this[templateType] = templateValue;
+      });
+    }
+  }
+
   public selectRequest(request: IRequest) {
     request.selected = !request.selected;
-    this.isAnyRequestSelected =
-      this.apiRequests &&
-        this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0
-        ? true
-        : false;
+    this.isAnyRequestSelected = this.apiRequests &&
+      this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0 ? true : false;
   }
 
   public generateScript(request: IRequest) {
-    // const blob = new Blob([data], { type: 'application/octet-stream' });
-    // chrome.downloads.download({ url: URL.createObjectURL(blob), filename });
     this._generateScripts([request]);
   }
 
   public generateSelectedScript() {
-    const selectedApis = this.apiRequests.filter(
-      (apiRequest) => apiRequest.selected
-    );
-    console.log(selectedApis);
+    const selectedApis = this.apiRequests.filter(apiRequest => apiRequest.selected);
     this._generateScripts(selectedApis);
   }
 
   public generateAllScript() {
     this._generateScripts(this.apiRequests);
-    console.log(this.apiRequests);
   }
 
   private _generateScripts(requests: IRequest[]) {
     let generatedMethods = '';
     let baseUrl = '';
+
     this._flattenDependencies();
     for (let i = 0; i < requests.length; i++) {
       const apiRequest = requests[i];
 
       let method: string;
       if (apiRequest.request.method === 'GET') {
-        method = getMethodTemplate;
+        method = this.getMethodTemplate;
       } else {
-        method = postMethodTemplate;
+        method = this.postMethodTemplate;
       }
 
       if (!baseUrl && apiRequest.request.url.indexOf('/api') > 0) {
@@ -125,7 +167,7 @@ export class AppComponent implements OnInit {
       generatedMethods += method;
     }
 
-    let testClass = testClassTemplate.replace('[[HostUrl]]', baseUrl);
+    let testClass = this.testClassTemplate.replace('[[HostUrl]]', baseUrl);
 
     testClass = testClass.replace('[[TEST_CASES]]', generatedMethods);
 
@@ -151,7 +193,7 @@ export class AppComponent implements OnInit {
     let dependecyLogic: string = '';
     this.sourceDependecies.forEach(srcDep => {
       if (srcDep.api === '*' || apiRequest.request.url.toLowerCase().indexOf(srcDep.api.toLowerCase()) > 0) {
-        let logic = sourceDependecyTemplate.replace("[[SOURCE_TYPE]]", srcDep.type);
+        let logic = SOURCEDEPENDECYTEMPLATE.replace("[[SOURCE_TYPE]]", srcDep.type);
         logic = logic.replace("[[SOURCE_PROP_NAME]]", srcDep.name);
         dependecyLogic += logic;
       }
@@ -163,7 +205,7 @@ export class AppComponent implements OnInit {
     this.destinationDependecies.forEach(desDep => {
       if ((desDep.api === '*' || apiRequest.request.url.toLowerCase().indexOf(desDep.api.toLowerCase()) > 0)
         && (!desDep.httpMethod || desDep.httpMethod.toUpperCase() === apiRequest.request.method.toUpperCase())) {
-        let logic = destinationDependecyTemplate.replace("[[DESTINATION_TYPE]]", desDep.type);
+        let logic = DESTINATIONDEPENDECYTEMPLATE.replace("[[DESTINATION_TYPE]]", desDep.type);
         logic = logic.replace("[[DESTINATION_PROP_NAME]]", desDep.name);
         logic = logic.replace("[[SOURCE_PROP_NAME]]", desDep.sourceName);
         dependecyLogic += logic;

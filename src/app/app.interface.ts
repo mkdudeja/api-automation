@@ -40,3 +40,8 @@ export interface IDependencyDefinition {
   dependencies?: Array<IDependency>;
   skipResponseAssert?: boolean;
 }
+
+export interface TabOptions {
+  name: string;
+  id: string;
+}

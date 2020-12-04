@@ -1,4 +1,4 @@
-export const getMethodTemplate = `
+export const GETMETHODTEMPLATE = `
         [Test, Order([[Order]])]
         public async Task [[TestName]]()
         {
@@ -21,7 +21,7 @@ export const getMethodTemplate = `
         }
 
 `;
-export const postMethodTemplate = `
+export const POSTMETHODTEMPLATE = `
         [Test, Order([[Order]])]
         public async Task [[TestName]]()
         {
@@ -47,15 +47,15 @@ export const postMethodTemplate = `
         }
 `;
 
-export const sourceDependecyTemplate = `
+export const SOURCEDEPENDECYTEMPLATE = `
             SetVariable(responseMessage, "[[SOURCE_TYPE]]", "[[SOURCE_PROP_NAME]]");
 `;
 
-export const destinationDependecyTemplate = `
+export const DESTINATIONDEPENDECYTEMPLATE = `
             apiUrl = SetRequest(apiUrl, "[[DESTINATION_TYPE]]", "[[DESTINATION_PROP_NAME]]", "[[SOURCE_PROP_NAME]]", requestJsonObject);
 `;
 
-export const testClassTemplate = `using NUnit.Framework;
+export const TESTCLASSTEMPLATE = `using NUnit.Framework;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

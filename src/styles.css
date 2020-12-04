@@ -8,7 +8,8 @@
 html,
 body {
   height: 100%;
-  font-size: 14px;
+  overflow: hidden;
+  font-size: 12px;
 }
 
 body {
@@ -36,8 +37,10 @@ body {
 
 .container {
   width: 100%;
-  padding: 1rem;
+  /* padding: 1rem; */
   overflow: hidden;
+  border-bottom: 1px solid #cccccc;
+  height: 100%;
 }
 
 .title {

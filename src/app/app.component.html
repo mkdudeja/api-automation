@@ -1,56 +1,89 @@
+<!-- <h1 class="title">
+  SHIFT + DEL: Generate API test cases with ease. Let developers focus on what
+  they are supposed to - Development
+</h1> -->
+
 <div class="container">
-  <h1 class="title">
-    SHIFT + DEL: Generate API test cases with ease. Let developers focus on what
-    they are supposed to - Development
-  </h1>
-  <!-- {{apiRequests | json}} -->
-  <table class="table" *ngIf="apiRequests && apiRequests.length">
-    <thead>
-      <tr>
-        <th class="w-50"></th>
-        <th class="w-75">Method</th>
-        <th>URL</th>
-        <th class="w-200">Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let apiRequest of apiRequests">
-        <td>
-          <input
-            type="checkbox"
-            [ngModel]="apiRequest.selected"
-            (change)="selectRequest(apiRequest)"
-          />
-        </td>
-        <td>{{ apiRequest.request.method }}</td>
-        <td class="table-item-url">{{ apiRequest.request.url }}</td>
-        <td>
-          <button
-            type="button"
-            (click)="generateScript(apiRequest)"
-            class="table-column-item-btn"
-          >
-            Generate script
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="left-panel" [ngClass]="{'collapsed': leftPanelCollapsed}">
+    <div class="tab">
+      <ng-container *ngIf="!leftPanelCollapsed">
+        <button *ngFor="let tabOption of tabOptions" (click)="selectedTab = tabOption.id"
+          [ngClass]="{'active': selectedTab === tabOption.id}">{{ tabOption.name }}</button>
+      </ng-container>
+      <button class="panel-toggle-btn" (click)="leftPanelCollapsed = !leftPanelCollapsed">
+        {{ leftPanelCollapsed ? '>>' : '<<'}}
+      </button>
+    </div>
 
-  <h3 *ngIf="!apiRequests || !apiRequests.length">
-    No requests are triggered yet
-  </h3>
+    <div *ngIf="!leftPanelCollapsed">
+      <div *ngIf="selectedTab === 'templates'">
+        <div class="tab-content-elem">
+          <select name="templateOptions" #templateOptionsRef (change)="templateTypeChange(templateOptionsRef.value)">
+            <option value="">Select template type</option>
+            <option value="getMethodTemplate">GET Method Template</option>
+            <option value="postMethodTemplate">POST Method Template</option>
+            <option value="testClassTemplate">Test Class Template</option>
+          </select>
+        </div>
 
-  <div class="buttons-container" *ngIf="apiRequests && apiRequests.length">
-    <button
-      type="button"
-      (click)="generateSelectedScript()"
-      [disabled]="!isAnyRequestSelected"
-    >
-      Generate selected scripts
-    </button>
-    <button type="button" (click)="generateAllScript()">
-      Generate all scripts
-    </button>
+        <!-- <div class="template-sub-container tab-content-elem">
+          <div class="label">Select a file that contains the template:</div>
+        </div>
+
+        <div class="option-separator">OR</div> -->
+
+        <div class="template-sub-container tab-content-elem">
+          <div class="label">Paste template here:</div>
+          <textarea #templateValueRef [disabled]="!templateOptionsRef.value || templateOptionsRef.value === ''"
+            [ngModel]="templateValue"></textarea>
+        </div>
+
+        <div class="buttons-container">
+          <button (click)="saveTemplate(templateValueRef.value, templateOptionsRef.value)"
+            [disabled]="!templateOptionsRef.value || templateOptionsRef.value === ''">Save template</button>
+        </div>
+      </div>
+
+      <div *ngIf="selectedTab === 'config'" class="tab-content">
+        Config tab
+      </div>
+
+      <div *ngIf="selectedTab === 'settings'" class="tab-content">
+        Settings tab
+      </div>
+    </div>
+  </div>
+
+  <div class="right-container" [ngClass]="{'collapsed': leftPanelCollapsed}">
+    <table class="table" *ngIf="apiRequests && apiRequests.length">
+      <thead>
+        <tr>
+          <th class="w-3"></th>
+          <th>Name</th>
+          <th class="w-6">Status</th>
+          <th class="w-6">Method</th>
+          <th class="w-10"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let apiRequest of apiRequests">
+          <td><input type="checkbox" [ngModel]="apiRequest.selected" (change)="selectRequest(apiRequest)" /></td>
+          <td title="{{apiRequest.request.url}}">{{ apiRequest.request.url }}</td>
+          <td>{{ apiRequest.response.status }}</td>
+          <td>{{ apiRequest.request.method }}</td>
+          <td>
+            <span (click)="generateScript(apiRequest)" class="generate-btn">Generate</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 *ngIf="!apiRequests || !apiRequests.length" class="no-requests">No requests are triggered yet</h3>
+
+    <div class="buttons-container" *ngIf="apiRequests && apiRequests.length">
+      <button type="button" (click)="generateSelectedScript()" [disabled]="!isAnyRequestSelected">Generate for selected</button>
+      <button type="button" (click)="generateAllScript()">Generate for all</button>
+      <button type="button" (click)="clearAllRequests()" class="warn-btn">Clear all</button>
+    </div>
   </div>
 </div>

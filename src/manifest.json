@@ -4,7 +4,7 @@
   "name": "API Test Case Automation",
   "description": "Chrome extention to automate API test cases generation",
   "devtools_page": "devtoolsBackground.html",
-  "permissions": ["downloads"],
+  "permissions": ["downloads", "storage"],
   "icons": {
     "128": "wifi_network_active.png"
   },
