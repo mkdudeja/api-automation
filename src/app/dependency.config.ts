@@ -7,11 +7,11 @@ export const dependencyMap: Array<IDependencyDefinition> = [
       {
         source: {
           api: 'account/GetAntiForgeryTokens',
-          type: 'response.cookies',
+          type: 'COOKIE',
           name: 'XSRF-TOKEN',
         },
         destination: {
-          type: 'header',
+          type: 'HEADER',
           name: 'X-XSRF-TOKEN',
           httpMethod: 'POST',
         },
@@ -24,15 +24,23 @@ export const dependencyMap: Array<IDependencyDefinition> = [
       {
         source: {
           api: 'account/login',
-          type: 'response.content',
+          type: 'CONTENT',
           name: 'SessionId',
         },
         destination: {
-          type: 'QueryParams',
+          type: 'QUERY_PARAMS',
           name: 'sessionId',
           httpMethod: 'GET',
         },
       },
     ],
+  },
+  {
+    api: 'account/login',
+    skipResponseAssert: true,
+  },
+  {
+    api: 'api/Program/GetPrograms',
+    skipResponseAssert: true,
   },
 ];

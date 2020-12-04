@@ -37,7 +37,8 @@ export interface IDependency {
 
 export interface IDependencyDefinition {
   api: string;
-  dependencies: Array<IDependency>;
+  dependencies?: Array<IDependency>;
+  skipResponseAssert?: boolean;
 }
 
 export interface TabOptions {
