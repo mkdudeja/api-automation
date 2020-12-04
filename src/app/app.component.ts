@@ -35,6 +35,9 @@ export class AppComponent implements OnInit {
           request.getContent((content: string, encoding: string) => {
             request.response.content.text = content;
             request.selected = false;
+
+            // processing the calls
+
             this.ngZone.run(() => {
               this.apiRequests.push(request);
               console.log('this.apiRequests', this.apiRequests);

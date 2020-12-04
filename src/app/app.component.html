@@ -1,27 +1,56 @@
-<div>
-  <h2>SHIFT + DEL: Generate API test cases with ease. Let developers focus on what they are supposed to - Development</h2>
+<div class="container">
+  <h1 class="title">
+    SHIFT + DEL: Generate API test cases with ease. Let developers focus on what
+    they are supposed to - Development
+  </h1>
   <!-- {{apiRequests | json}} -->
-  <table *ngIf="apiRequests && apiRequests.length">
-    <tr>
-      <th></th>
-      <th>Method</th>
-      <th>URL</th>
-      <th></th>
-    </tr>
-    <tr *ngFor="let apiRequest of apiRequests">
-      <td>
-        <input type="checkbox" [ngModel]="apiRequest.selected" (change)="selectRequest(apiRequest)">
-      </td>
-      <td>{{apiRequest.request.method}}</td>
-      <td class="table-item-url">{{apiRequest.request.url}}</td>
-      <td><button type="button" (click)="generateScript(apiRequest)" class="table-column-item-btn">Generate script</button></td>
-    </tr>
+  <table class="table" *ngIf="apiRequests && apiRequests.length">
+    <thead>
+      <tr>
+        <th class="w-50"></th>
+        <th class="w-75">Method</th>
+        <th>URL</th>
+        <th class="w-200">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let apiRequest of apiRequests">
+        <td>
+          <input
+            type="checkbox"
+            [ngModel]="apiRequest.selected"
+            (change)="selectRequest(apiRequest)"
+          />
+        </td>
+        <td>{{ apiRequest.request.method }}</td>
+        <td class="table-item-url">{{ apiRequest.request.url }}</td>
+        <td>
+          <button
+            type="button"
+            (click)="generateScript(apiRequest)"
+            class="table-column-item-btn"
+          >
+            Generate script
+          </button>
+        </td>
+      </tr>
+    </tbody>
   </table>
 
-  <h3 *ngIf="!apiRequests || !apiRequests.length">No requests are triggered yet</h3>
+  <h3 *ngIf="!apiRequests || !apiRequests.length">
+    No requests are triggered yet
+  </h3>
 
   <div class="buttons-container" *ngIf="apiRequests && apiRequests.length">
-    <button type="button" (click)="generateSelectedScript()" [disabled]="!isAnyRequestSelected">Generate selected scripts</button>
-    <button type="button" (click)="generateAllScript()">Generate all scripts</button>
+    <button
+      type="button"
+      (click)="generateSelectedScript()"
+      [disabled]="!isAnyRequestSelected"
+    >
+      Generate selected scripts
+    </button>
+    <button type="button" (click)="generateAllScript()">
+      Generate all scripts
+    </button>
   </div>
 </div>
