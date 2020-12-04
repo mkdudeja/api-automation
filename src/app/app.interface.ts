@@ -5,7 +5,7 @@ export interface IRequest extends chrome.devtools.network.Request {
 
 export interface IDependencySource {
   api: string;
-  path: string;
+  type: string;
   name: string;
 }
 
@@ -13,6 +13,21 @@ export interface IDependencyDestination {
   type: string;
   name: string;
   httpMethod: string;
+}
+
+export interface IDependencySourceFlat {
+  api: string;
+  type: string;
+  name: string;
+  httpMethod?: string;
+}
+
+export interface IDependencyDestinationFlat {
+  api: string;
+  type: string;
+  name: string;
+  httpMethod?: string;
+  sourceName: string;
 }
 
 export interface IDependency {

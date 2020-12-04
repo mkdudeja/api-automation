@@ -4,13 +4,16 @@ export const getMethodTemplate = `
         {
             var expectedResponse = @"[[JSONResponseContent]]";
 
+            var apiUrl = "[[ApiUrl]]";
+            [[DestinationDependencyLogic]]
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            HttpResponseMessage responseMessage = await Client.GetAsync("[[ApiUrl]]");
+            HttpResponseMessage responseMessage = await Client.GetAsync(apiUrl);
 
             Assert.IsTrue(responseMessage.IsSuccessStatusCode);
             var actualResponse = await responseMessage.Content.ReadAsStringAsync();
             Assert.IsTrue(IsJsonEqual(actualResponse, expectedResponse));
             SetCookies(responseMessage);
+            [[SourceDependencyLogic]]
         }
 
 `;
@@ -22,14 +25,25 @@ export const postMethodTemplate = `
 
             var expectedResponse = @"[[JSONResponseContent]]";
 
+            var apiUrl = "[[ApiUrl]]";
+            [[DestinationDependencyLogic]]
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            HttpResponseMessage responseMessage = await Client.PostAsync("[[ApiUrl]]" , new StringContent(requestJson, Encoding.UTF8, "application/json"));
+            HttpResponseMessage responseMessage = await Client.PostAsync(apiUrl, new StringContent(requestJson, Encoding.UTF8, "application/json"));
 
             Assert.IsTrue(responseMessage.IsSuccessStatusCode);
             var actualResponse = await responseMessage.Content.ReadAsStringAsync();
             Assert.IsTrue(IsJsonEqual(actualResponse, expectedResponse));
             SetCookies(responseMessage);
+            [[SourceDependencyLogic]]
         }
+`;
+
+export const sourceDependecyTemplate = `
+            SetVariable(responseMessage, "[[SOURCE_TYPE]]", "[[SOURCE_PROP_NAME]]");
+`;
+
+export const destinationDependecyTemplate = `
+            apiUrl = SetRequest(apiUrl, "[[DESTINATION_TYPE]]", "[[DESTINATION_PROP_NAME]]", "[[SOURCE_PROP_NAME]]");
 `;
 
 export const testClassTemplate = `using NUnit.Framework;
@@ -94,6 +108,16 @@ namespace ApiTests
                     this.cookies.SetCookies(urid, cookie);
                 });
             }
+        }
+
+        private string SetRequest(string apiUrl, string type, string destinationPropName, string sourceVariableName)
+        {
+            return apiUrl;
+        }
+
+        private void SetVariable(HttpResponseMessage response, string type, string propName)
+        {
+
         }
 
     }

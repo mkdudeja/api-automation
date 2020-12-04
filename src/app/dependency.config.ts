@@ -7,7 +7,7 @@ export const dependencyMap: Array<IDependencyDefinition> = [
       {
         source: {
           api: 'account/GetAntiForgeryTokens',
-          path: 'response.cookies',
+          type: 'response.cookies',
           name: 'XSRF-TOKEN',
         },
         destination: {
@@ -24,7 +24,7 @@ export const dependencyMap: Array<IDependencyDefinition> = [
       {
         source: {
           api: 'account/login',
-          path: 'response.content.text',
+          type: 'response.content',
           name: 'SessionId',
         },
         destination: {
