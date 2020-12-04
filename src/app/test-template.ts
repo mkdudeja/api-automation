@@ -9,7 +9,7 @@ export const getMethodTemplate = `
 
             Assert.IsTrue(responseMessage.IsSuccessStatusCode);
             var actualResponse = await responseMessage.Content.ReadAsStringAsync();
-            Assert.IsTrue(IsJsonStructureSame(actualResponse, expectedResponse));
+            Assert.IsTrue(IsJsonEqual(actualResponse, expectedResponse));
             SetCookies(responseMessage);
         }
 
@@ -27,7 +27,7 @@ export const postMethodTemplate = `
 
             Assert.IsTrue(responseMessage.IsSuccessStatusCode);
             var actualResponse = await responseMessage.Content.ReadAsStringAsync();
-            Assert.IsTrue(IsJsonStructureSame(actualResponse, expectedResponse));
+            Assert.IsTrue(IsJsonEqual(actualResponse, expectedResponse));
             SetCookies(responseMessage);
         }
 `;
@@ -76,27 +76,11 @@ namespace ApiTests
 
         [[TEST_CASES]]
 
-        private bool IsJsonStructureSame(string expectedResponse, string actualResponse)
+        private bool IsJsonEqual(string expectedResponse, string actualResponse)
         {
-            JObject expectedResponseObject = JObject.Parse(actualResponse);
+            JObject expectedResponseObject = JObject.Parse(expectedResponse);
             JObject actualResponseObject = JObject.Parse(actualResponse);
             return JToken.DeepEquals(actualResponseObject, expectedResponseObject);
-        }
-
-        private string SetSessionId(string uri)
-        {
-            Uri urid = new Uri(hostUrl);
-            var s = cookies.GetCookies(urid);
-            string sessionId = s[0].Value;
-
-            if (uri.IndexOf('?') > -1)
-            {
-                return uri += "&sessionId=" + sessionId;
-            }
-            else
-            {
-                return uri += "?sessionId=" + sessionId;
-            }
         }
 
         private void SetCookies(HttpResponseMessage responseMessage)
