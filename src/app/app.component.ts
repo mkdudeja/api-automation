@@ -4,6 +4,7 @@ import {
   IDependencyDestinationFlat,
   IRequest,
   TabOptions,
+  IDependencyDefinition,
 } from './app.interface';
 import { dependencyMap } from './dependency.config';
 import {
@@ -13,6 +14,7 @@ import {
   DESTINATIONDEPENDECYTEMPLATE,
   TESTCLASSTEMPLATE,
 } from './test-template';
+import * as helper from './helper-extensions';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +36,7 @@ export class AppComponent implements OnInit {
 
   configValue: string = null;
   templateValue: string = null;
+  dependencyDefs: Array<IDependencyDefinition> = dependencyMap;
 
   tabOptions: TabOptions[] = [
     { name: 'Templates', id: 'templates' },
@@ -52,7 +55,7 @@ export class AppComponent implements OnInit {
       (tab: chrome.tabs.Tab) => {
         const location = new URL(tab.url);
         this.hostname = location.hostname;
-        console.log('this.hostname', this.hostname);
+        this._initFromStorage();
       }
     );
 
@@ -84,7 +87,6 @@ export class AppComponent implements OnInit {
   private checkForTemplates() {
     chrome.storage.local.get(['getMethodTemplate'], (result) => {
       this.getMethodTemplate = result.key || GETMETHODTEMPLATE;
-      console.log(this.getMethodTemplate);
     });
 
     chrome.storage.local.get(['postMethodTemplate'], (result) => {
@@ -99,11 +101,10 @@ export class AppComponent implements OnInit {
   public clearAllRequests() {}
 
   public saveConfig(configValue: string) {
-    // this._setStorage('config', configValue);
+    this._setStorage('config', configValue);
   }
 
   public templateTypeChange(templateType: string) {
-    console.log(templateType);
     chrome.storage.local.get([templateType], (result) => {
       this[templateType] = result.key || this[templateType];
     });
@@ -173,7 +174,11 @@ export class AppComponent implements OnInit {
       if (apiRequest.request.url.indexOf('?') >= 0) {
         testName = testName.split('?')[0];
       }
-      testName = testName[0].toUpperCase() + testName.substring(1) + '_' + (i + 1).toString()
+      testName =
+        testName[0].toUpperCase() +
+        testName.substring(1) +
+        '_' +
+        (i + 1).toString();
       method = method.replace('[[TestName]]', testName);
 
       let content = apiRequest.request.postData
@@ -210,11 +215,16 @@ export class AppComponent implements OnInit {
   }
 
   private _setReponseAssertion(apiRequest: IRequest, method: string): string {
-    for(let i = 0; i < dependencyMap.length; i++) {
-      if ((dependencyMap[i].api === '*' || apiRequest.request.url.toLowerCase().indexOf(dependencyMap[i].api.toLowerCase()) > 0)
-          && (dependencyMap[i].skipResponseAssert)) {
-            return method.replace('[[AssertReponse]]', 'false');
-          }
+    for (let i = 0; i < dependencyMap.length; i++) {
+      if (
+        (dependencyMap[i].api === '*' ||
+          apiRequest.request.url
+            .toLowerCase()
+            .indexOf(dependencyMap[i].api.toLowerCase()) > 0) &&
+        dependencyMap[i].skipResponseAssert
+      ) {
+        return method.replace('[[AssertReponse]]', 'false');
+      }
     }
 
     return method.replace('[[AssertReponse]]', 'true');
@@ -268,42 +278,57 @@ export class AppComponent implements OnInit {
   private _flattenDependencies() {
     this.sourceDependecies = [];
     this.destinationDependecies = [];
-    dependencyMap.forEach(requestDependency => {
-
+    dependencyMap.forEach((requestDependency) => {
       if (requestDependency.dependencies) {
-        requestDependency.dependencies.forEach(dependency => {
+        requestDependency.dependencies.forEach((dependency) => {
           const src: IDependencySourceFlat = {
-            api: dependency.source.api
-            , type: dependency.source.type
-            , name: dependency.source.name
+            api: dependency.source.api,
+            type: dependency.source.type,
+            name: dependency.source.name,
           };
           const des: IDependencyDestinationFlat = {
-            api: requestDependency.api
-            , type: dependency.destination.type
-            , name: dependency.destination.name
-            , httpMethod: dependency.destination.httpMethod
-            , sourceName: dependency.source.name
+            api: requestDependency.api,
+            type: dependency.destination.type,
+            name: dependency.destination.name,
+            httpMethod: dependency.destination.httpMethod,
+            sourceName: dependency.source.name,
           };
           this.sourceDependecies.push(src);
           this.destinationDependecies.push(des);
         });
       }
-
     });
   }
 
   private _setStorage(key: string, value: string) {
-    chrome.storage.local.get(
-      [this.hostname],
-      (data: { [k: string]: string }) => {
-        value = value.trim();
-        if (value) {
-          data[key] = value;
-        } else {
-          delete data[key];
-        }
-        chrome.storage.local.set({ [this.hostname]: data });
+    const keyName = this.hostname;
+    chrome.storage.local.get([keyName], (data: { [k: string]: string }) => {
+      const storageData = data.hasOwnProperty(keyName) ? data[keyName] : {};
+      value = value.trim();
+      if (value) {
+        storageData[key] = JSON.stringify(value);
+      } else {
+        delete storageData[key];
       }
-    );
+      chrome.storage.local.set({ [keyName]: storageData });
+    });
+  }
+
+  private _initFromStorage() {
+    const keyName = this.hostname;
+    chrome.storage.local.get([keyName], (data: { [k: string]: string }) => {
+      const storageData = data.hasOwnProperty(keyName) ? data[keyName] : {},
+        configValue = helper.getPropertyValue(storageData, 'config', null);
+      console.log('storageData', storageData);
+      // init class members - dependencyDefs
+      try {
+        this.dependencyDefs = configValue
+          ? JSON.parse(configValue)
+          : dependencyMap;
+      } catch (e) {
+        this.dependencyDefs = dependencyMap;
+        console.log('[Error] dependencyDefs', e);
+      }
+    });
   }
 }

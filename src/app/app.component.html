@@ -4,21 +4,33 @@
 </h1> -->
 
 <div class="container">
-  <div class="left-panel" [ngClass]="{'collapsed': leftPanelCollapsed}">
+  <div class="left-panel" [ngClass]="{ collapsed: leftPanelCollapsed }">
     <div class="tab">
       <ng-container *ngIf="!leftPanelCollapsed">
-        <button *ngFor="let tabOption of tabOptions" (click)="selectedTab = tabOption.id"
-          [ngClass]="{'active': selectedTab === tabOption.id}">{{ tabOption.name }}</button>
+        <button
+          *ngFor="let tabOption of tabOptions"
+          (click)="selectedTab = tabOption.id"
+          [ngClass]="{ active: selectedTab === tabOption.id }"
+        >
+          {{ tabOption.name }}
+        </button>
       </ng-container>
-      <button class="panel-toggle-btn" (click)="leftPanelCollapsed = !leftPanelCollapsed">
-        {{ leftPanelCollapsed ? '>>' : '<<'}}
+      <button
+        class="panel-toggle-btn"
+        (click)="leftPanelCollapsed = !leftPanelCollapsed"
+      >
+        {{ leftPanelCollapsed ? ">>" : "<<" }}
       </button>
     </div>
 
     <div *ngIf="!leftPanelCollapsed">
       <div *ngIf="selectedTab === 'templates'">
         <div class="tab-content-elem">
-          <select name="templateOptions" #templateOptionsRef (change)="templateTypeChange(templateOptionsRef.value)">
+          <select
+            name="templateOptions"
+            #templateOptionsRef
+            (change)="templateTypeChange(templateOptionsRef.value)"
+          >
             <option value="">Select template type</option>
             <option value="getMethodTemplate">GET Method Template</option>
             <option value="postMethodTemplate">POST Method Template</option>
@@ -34,33 +46,48 @@
 
         <div class="template-sub-container tab-content-elem">
           <div class="label">Paste template here:</div>
-          <textarea #templateValueRef [disabled]="!templateOptionsRef.value || templateOptionsRef.value === ''"
-            [ngModel]="templateValue"></textarea>
+          <textarea
+            #templateValueRef
+            [disabled]="
+              !templateOptionsRef.value || templateOptionsRef.value === ''
+            "
+            [ngModel]="templateValue"
+          ></textarea>
         </div>
 
         <div class="buttons-container">
-          <button (click)="saveTemplate(templateValueRef.value, templateOptionsRef.value)"
-            [disabled]="!templateOptionsRef.value || templateOptionsRef.value === ''">Save template</button>
+          <button
+            (click)="
+              saveTemplate(templateValueRef.value, templateOptionsRef.value)
+            "
+            [disabled]="
+              !templateOptionsRef.value || templateOptionsRef.value === ''
+            "
+          >
+            Save template
+          </button>
         </div>
       </div>
 
       <div *ngIf="selectedTab === 'config'" class="tab-content">
         <div class="template-sub-container tab-content-elem">
           <div class="label">Dependencies configuration:</div>
-          <textarea #configValueRef placeholder="Enter dependencies configuration here"></textarea>
+          <textarea
+            #configValueRef
+            [value]="dependencyDefs"
+            placeholder="Enter dependencies configuration here"
+          ></textarea>
         </div>
         <div class="buttons-container">
-          <button (click)="saveConfig(configValueRef.value)">Save config</button>
+          <button (click)="saveConfig(configValueRef.value)">
+            Save config
+          </button>
         </div>
-      </div>
-
-      <div *ngIf="selectedTab === 'settings'" class="tab-content">
-        Settings tab
       </div>
     </div>
   </div>
 
-  <div class="right-container" [ngClass]="{'collapsed': leftPanelCollapsed}">
+  <div class="right-container" [ngClass]="{ collapsed: leftPanelCollapsed }">
     <table class="table" *ngIf="apiRequests && apiRequests.length">
       <thead>
         <tr>
@@ -73,23 +100,45 @@
       </thead>
       <tbody>
         <tr *ngFor="let apiRequest of apiRequests">
-          <td><input type="checkbox" [ngModel]="apiRequest.selected" (change)="selectRequest(apiRequest)" /></td>
-          <td title="{{apiRequest.request.url}}">{{ apiRequest.request.url }}</td>
+          <td>
+            <input
+              type="checkbox"
+              [ngModel]="apiRequest.selected"
+              (change)="selectRequest(apiRequest)"
+            />
+          </td>
+          <td title="{{ apiRequest.request.url }}">
+            {{ apiRequest.request.url }}
+          </td>
           <td>{{ apiRequest.response.status }}</td>
           <td>{{ apiRequest.request.method }}</td>
           <td>
-            <span (click)="generateScript(apiRequest)" class="generate-btn">Generate</span>
+            <span (click)="generateScript(apiRequest)" class="generate-btn"
+              >Generate</span
+            >
           </td>
         </tr>
       </tbody>
     </table>
 
-    <h3 *ngIf="!apiRequests || !apiRequests.length" class="no-requests">No requests are triggered yet</h3>
+    <h3 *ngIf="!apiRequests || !apiRequests.length" class="no-requests">
+      No requests are triggered yet
+    </h3>
 
     <div class="buttons-container" *ngIf="apiRequests && apiRequests.length">
-      <button type="button" (click)="generateSelectedScript()" [disabled]="!isAnyRequestSelected">Generate for selected</button>
-      <button type="button" (click)="generateAllScript()">Generate for all</button>
-      <button type="button" (click)="clearAllRequests()" class="warn-btn">Clear all</button>
+      <button
+        type="button"
+        (click)="generateSelectedScript()"
+        [disabled]="!isAnyRequestSelected"
+      >
+        Generate for selected
+      </button>
+      <button type="button" (click)="generateAllScript()">
+        Generate for all
+      </button>
+      <button type="button" (click)="clearAllRequests()" class="warn-btn">
+        Clear all
+      </button>
     </div>
   </div>
 </div>
