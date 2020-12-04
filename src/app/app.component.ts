@@ -1,14 +1,8 @@
 import {
   Component,
-  ElementRef,
   NgZone,
-  OnInit,
-  QueryList,
-  TemplateRef,
-  ViewChildren,
+  OnInit
 } from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
-import { HARDataSource } from './HAR_Data';
 
 interface IRequest extends chrome.devtools.network.Request {
   _resourceType: string;
