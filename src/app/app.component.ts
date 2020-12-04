@@ -1,5 +1,10 @@
 import { Component, NgZone, OnInit } from '@angular/core';
-import { IDependencySourceFlat, IDependencyDestinationFlat, IRequest, TabOptions } from './app.interface';
+import {
+  IDependencySourceFlat,
+  IDependencyDestinationFlat,
+  IRequest,
+  TabOptions,
+} from './app.interface';
 import { dependencyMap } from './dependency.config';
 import {
   GETMETHODTEMPLATE,
@@ -15,7 +20,6 @@ import {
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-
   constructor(private ngZone: NgZone) {}
 
   title = 'APIAutomation';
@@ -25,25 +29,43 @@ export class AppComponent implements OnInit {
   apiRequests: Array<IRequest> = [];
   // apiRequests: any[] = HARDataSource.filter(apiRequest => apiRequest._resourceType === 'xhr');
   isAnyRequestSelected = false;
-  leftPanelCollapsed: boolean = true;
-  selectedTab: string = 'templates';
+  leftPanelCollapsed = true;
+  selectedTab = 'templates';
+
+  configValue: string = null;
   templateValue: string = null;
 
   tabOptions: TabOptions[] = [
-    { name: 'Templates', id: "templates" },
-    { name: 'Config', id: "config" },
-    { name: 'Settings', id: "settings" }
-  ]
+    { name: 'Templates', id: 'templates' },
+    { name: 'Config', id: 'config' },
+    { name: 'Settings', id: 'settings' },
+  ];
 
+  hostname = null;
   sourceDependecies: IDependencySourceFlat[];
   destinationDependecies: IDependencyDestinationFlat[];
 
   ngOnInit() {
+    // initialize hostname
+    chrome.tabs.get(
+      chrome.devtools.inspectedWindow.tabId,
+      (tab: chrome.tabs.Tab) => {
+        const location = new URL(tab.url);
+        this.hostname = location.hostname;
+        console.log('this.hostname', this.hostname);
+      }
+    );
+
     this.checkForTemplates();
 
+    // subscribe to network request
     chrome.devtools.network.onRequestFinished.addListener(
       (request: IRequest) => {
-        if (request._resourceType === 'xhr' && !request.request.url.includes('sockjs-node')) {
+        if (
+          request._resourceType === 'xhr' &&
+          request.request.url.indexOf('/api') > -1 &&
+          !request.request.url.includes('sockjs-node')
+        ) {
           request.getContent((content: string, encoding: string) => {
             request.response.content.text = content;
             request.selected = false;
@@ -74,21 +96,25 @@ export class AppComponent implements OnInit {
     });
   }
 
-  public clearAllRequests() {
+  public clearAllRequests() {}
 
+  public saveConfig(configValue: string) {
+    // this._setStorage('config', configValue);
   }
 
   public templateTypeChange(templateType: string) {
     console.log(templateType);
     chrome.storage.local.get([templateType], (result) => {
       this[templateType] = result.key || this[templateType];
-    })
+    });
   }
 
   public saveTemplate(templateValue: string, templateType: string) {
     if (templateValue) {
-      chrome.storage.local.set({templateType: templateValue}, function() {
-        console.log('Value is set to ' + templateValue + ' for ' + templateValue);
+      chrome.storage.local.set({ templateType: templateValue }, function () {
+        console.log(
+          'Value is set to ' + templateValue + ' for ' + templateValue
+        );
         this[templateType] = templateValue;
       });
     }
@@ -96,8 +122,11 @@ export class AppComponent implements OnInit {
 
   public selectRequest(request: IRequest) {
     request.selected = !request.selected;
-    this.isAnyRequestSelected = this.apiRequests &&
-      this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0 ? true : false;
+    this.isAnyRequestSelected =
+      this.apiRequests &&
+      this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0
+        ? true
+        : false;
   }
 
   public generateScript(request: IRequest) {
@@ -105,7 +134,9 @@ export class AppComponent implements OnInit {
   }
 
   public generateSelectedScript() {
-    const selectedApis = this.apiRequests.filter(apiRequest => apiRequest.selected);
+    const selectedApis = this.apiRequests.filter(
+      (apiRequest) => apiRequest.selected
+    );
     this._generateScripts(selectedApis);
   }
 
@@ -179,28 +210,45 @@ export class AppComponent implements OnInit {
 
   private _addDependecyLogic(apiRequest: IRequest, method: string): string {
     let dependecyLogic: string = '';
-    this.sourceDependecies.forEach(srcDep => {
-      if (srcDep.api === '*' || apiRequest.request.url.toLowerCase().indexOf(srcDep.api.toLowerCase()) > 0) {
-        let logic = SOURCEDEPENDECYTEMPLATE.replace("[[SOURCE_TYPE]]", srcDep.type);
-        logic = logic.replace("[[SOURCE_PROP_NAME]]", srcDep.name);
+    this.sourceDependecies.forEach((srcDep) => {
+      if (
+        srcDep.api === '*' ||
+        apiRequest.request.url.toLowerCase().indexOf(srcDep.api.toLowerCase()) >
+          0
+      ) {
+        let logic = SOURCEDEPENDECYTEMPLATE.replace(
+          '[[SOURCE_TYPE]]',
+          srcDep.type
+        );
+        logic = logic.replace('[[SOURCE_PROP_NAME]]', srcDep.name);
         dependecyLogic += logic;
       }
     });
 
-    method = method.replace("[[SourceDependencyLogic]]", dependecyLogic);
+    method = method.replace('[[SourceDependencyLogic]]', dependecyLogic);
 
     dependecyLogic = '';
-    this.destinationDependecies.forEach(desDep => {
-      if ((desDep.api === '*' || apiRequest.request.url.toLowerCase().indexOf(desDep.api.toLowerCase()) > 0)
-        && (!desDep.httpMethod || desDep.httpMethod.toUpperCase() === apiRequest.request.method.toUpperCase())) {
-        let logic = DESTINATIONDEPENDECYTEMPLATE.replace("[[DESTINATION_TYPE]]", desDep.type);
-        logic = logic.replace("[[DESTINATION_PROP_NAME]]", desDep.name);
-        logic = logic.replace("[[SOURCE_PROP_NAME]]", desDep.sourceName);
+    this.destinationDependecies.forEach((desDep) => {
+      if (
+        (desDep.api === '*' ||
+          apiRequest.request.url
+            .toLowerCase()
+            .indexOf(desDep.api.toLowerCase()) > 0) &&
+        (!desDep.httpMethod ||
+          desDep.httpMethod.toUpperCase() ===
+            apiRequest.request.method.toUpperCase())
+      ) {
+        let logic = DESTINATIONDEPENDECYTEMPLATE.replace(
+          '[[DESTINATION_TYPE]]',
+          desDep.type
+        );
+        logic = logic.replace('[[DESTINATION_PROP_NAME]]', desDep.name);
+        logic = logic.replace('[[SOURCE_PROP_NAME]]', desDep.sourceName);
         dependecyLogic += logic;
       }
     });
 
-    method = method.replace("[[DestinationDependencyLogic]]", dependecyLogic);
+    method = method.replace('[[DestinationDependencyLogic]]', dependecyLogic);
 
     return method;
   }
@@ -208,28 +256,38 @@ export class AppComponent implements OnInit {
   private _flattenDependencies() {
     this.sourceDependecies = [];
     this.destinationDependecies = [];
-    dependencyMap.forEach(requestDependency => {
-
-      requestDependency.dependencies.forEach(dependency => {
+    dependencyMap.forEach((requestDependency) => {
+      requestDependency.dependencies.forEach((dependency) => {
         const src: IDependencySourceFlat = {
-          api: dependency.source.api
-          , type: dependency.source.type
-          , name: dependency.source.name
+          api: dependency.source.api,
+          type: dependency.source.type,
+          name: dependency.source.name,
         };
         const des: IDependencyDestinationFlat = {
-          api: requestDependency.api
-          , type: dependency.destination.type
-          , name: dependency.destination.name
-          , httpMethod: dependency.destination.httpMethod
-          , sourceName: dependency.source.name
+          api: requestDependency.api,
+          type: dependency.destination.type,
+          name: dependency.destination.name,
+          httpMethod: dependency.destination.httpMethod,
+          sourceName: dependency.source.name,
         };
         this.sourceDependecies.push(src);
         this.destinationDependecies.push(des);
       });
-
     });
   }
 
+  private _setStorage(key: string, value: string) {
+    chrome.storage.local.get(
+      [this.hostname],
+      (data: { [k: string]: string }) => {
+        value = value.trim();
+        if (value) {
+          data[key] = value;
+        } else {
+          delete data[key];
+        }
+        chrome.storage.local.set({ [this.hostname]: data });
+      }
+    );
+  }
 }
-
-

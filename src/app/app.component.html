@@ -45,7 +45,13 @@
       </div>
 
       <div *ngIf="selectedTab === 'config'" class="tab-content">
-        Config tab
+        <div class="template-sub-container tab-content-elem">
+          <div class="label">Dependencies configuration:</div>
+          <textarea #configValueRef placeholder="Enter dependencies configuration here"></textarea>
+        </div>
+        <div class="buttons-container">
+          <button (click)="saveConfig(configValueRef.value)">Save config</button>
+        </div>
       </div>
 
       <div *ngIf="selectedTab === 'settings'" class="tab-content">
