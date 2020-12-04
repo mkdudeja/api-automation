@@ -91,6 +91,7 @@ export class AppComponent implements OnInit {
       }
 
       method = this._addDependecyLogic(apiRequest, method);
+      method = this._setReponseAssertion(apiRequest, method);
 
       method = method.replace('[[Order]]', (i + 1).toString());
       const urlParts = apiRequest.request.url.split('/');
@@ -99,7 +100,7 @@ export class AppComponent implements OnInit {
       if (apiRequest.request.url.indexOf('?') >= 0) {
         testName = testName.split('?')[0];
       }
-
+      testName = testName[0].toUpperCase() + testName.substring(1) + '_' + (i + 1).toString()
       method = method.replace('[[TestName]]', testName);
 
       let content = apiRequest.request.postData
@@ -135,6 +136,17 @@ export class AppComponent implements OnInit {
     });
   }
 
+  private _setReponseAssertion(apiRequest: IRequest, method: string): string {
+    for(let i = 0; i < dependencyMap.length; i++) {
+      if ((dependencyMap[i].api === '*' || apiRequest.request.url.toLowerCase().indexOf(dependencyMap[i].api.toLowerCase()) > 0)
+          && (dependencyMap[i].skipResponseAssert)) {
+            return method.replace('[[AssertReponse]]', 'false');
+          }
+    }
+
+    return method.replace('[[AssertReponse]]', 'true');
+  }
+
   private _addDependecyLogic(apiRequest: IRequest, method: string): string {
     let dependecyLogic: string = '';
     this.sourceDependecies.forEach(srcDep => {
@@ -168,22 +180,24 @@ export class AppComponent implements OnInit {
     this.destinationDependecies = [];
     dependencyMap.forEach(requestDependency => {
 
-      requestDependency.dependencies.forEach(dependency => {
-        const src: IDependencySourceFlat = {
-          api: dependency.source.api
-          , type: dependency.source.type
-          , name: dependency.source.name
-        };
-        const des: IDependencyDestinationFlat = {
-          api: requestDependency.api
-          , type: dependency.destination.type
-          , name: dependency.destination.name
-          , httpMethod: dependency.destination.httpMethod
-          , sourceName: dependency.source.name
-        };
-        this.sourceDependecies.push(src);
-        this.destinationDependecies.push(des);
-      });
+      if (requestDependency.dependencies) {
+        requestDependency.dependencies.forEach(dependency => {
+          const src: IDependencySourceFlat = {
+            api: dependency.source.api
+            , type: dependency.source.type
+            , name: dependency.source.name
+          };
+          const des: IDependencyDestinationFlat = {
+            api: requestDependency.api
+            , type: dependency.destination.type
+            , name: dependency.destination.name
+            , httpMethod: dependency.destination.httpMethod
+            , sourceName: dependency.source.name
+          };
+          this.sourceDependecies.push(src);
+          this.destinationDependecies.push(des);
+        });
+      }
 
     });
   }
