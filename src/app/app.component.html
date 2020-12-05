@@ -88,38 +88,40 @@
   </div>
 
   <div class="right-container" [ngClass]="{ collapsed: leftPanelCollapsed }">
-    <table class="table" *ngIf="apiRequests && apiRequests.length">
-      <thead>
-        <tr>
-          <th class="w-3"></th>
-          <th>Name</th>
-          <th class="w-6">Status</th>
-          <th class="w-6">Method</th>
-          <th class="w-10"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let apiRequest of apiRequests">
-          <td>
-            <input
-              type="checkbox"
-              [ngModel]="apiRequest.selected"
-              (change)="selectRequest(apiRequest)"
-            />
-          </td>
-          <td title="{{ apiRequest.request.url }}">
-            {{ apiRequest.request.url }}
-          </td>
-          <td>{{ apiRequest.response.status }}</td>
-          <td>{{ apiRequest.request.method }}</td>
-          <td>
-            <span (click)="generateScript(apiRequest)" class="generate-btn"
-              >Generate</span
-            >
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-container">
+      <table class="table" *ngIf="apiRequests && apiRequests.length">
+        <thead>
+          <tr>
+            <th class="w-3"></th>
+            <th>Name</th>
+            <th class="w-6">Status</th>
+            <th class="w-6">Method</th>
+            <th class="w-10"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let apiRequest of apiRequests">
+            <td>
+              <input
+                type="checkbox"
+                [ngModel]="apiRequest.selected"
+                (change)="selectRequest(apiRequest)"
+              />
+            </td>
+            <td title="{{ apiRequest.request.url }}">
+              {{ apiRequest.request.url }}
+            </td>
+            <td>{{ apiRequest.response.status }}</td>
+            <td>{{ apiRequest.request.method }}</td>
+            <td>
+              <span (click)="generateScript(apiRequest)" class="generate-btn"
+                >Generate</span
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <h3 *ngIf="!apiRequests || !apiRequests.length" class="no-requests">
       No requests are triggered yet

@@ -22,7 +22,7 @@ import * as helper from './helper-extensions';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  constructor(private ngZone: NgZone) {}
+  constructor(private ngZone: NgZone) { }
 
   title = 'APIAutomation';
   getMethodTemplate: string = null;
@@ -98,7 +98,9 @@ export class AppComponent implements OnInit {
     });
   }
 
-  public clearAllRequests() {}
+  public clearAllRequests() {
+    this.apiRequests = [];
+  }
 
   public saveConfig(configValue: string) {
     this._setStorage('config', configValue);
@@ -125,7 +127,7 @@ export class AppComponent implements OnInit {
     request.selected = !request.selected;
     this.isAnyRequestSelected =
       this.apiRequests &&
-      this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0
+        this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0
         ? true
         : false;
   }
@@ -170,7 +172,14 @@ export class AppComponent implements OnInit {
       method = method.replace('[[Order]]', (i + 1).toString());
       const urlParts = apiRequest.request.url.split('/');
 
-      let testName = urlParts[urlParts.length - 1];
+      let testName: string = ''
+      for (let i = urlParts.length - 1; i >= 0; i--) {
+        if (urlParts[i] !== '') {
+          testName = urlParts[i];
+          break;
+        }
+      }
+
       if (apiRequest.request.url.indexOf('?') >= 0) {
         testName = testName.split('?')[0];
       }
@@ -184,12 +193,18 @@ export class AppComponent implements OnInit {
       let content = apiRequest.request.postData
         ? apiRequest.request.postData.text
         : '';
+      if (!content) {
+        content = '';
+      }
       content = content.replace(/\"/g, '""');
       method = method.replace('[[JSONRequestContent]]', content);
 
       content = apiRequest.response.content
         ? apiRequest.response.content.text
         : '';
+      if (!content) {
+        content = '';
+      }
       content = content.replace(/\"/g, '""');
       method = method.replace('[[JSONResponseContent]]', content);
 
@@ -236,7 +251,7 @@ export class AppComponent implements OnInit {
       if (
         srcDep.api === '*' ||
         apiRequest.request.url.toLowerCase().indexOf(srcDep.api.toLowerCase()) >
-          0
+        0
       ) {
         let logic = SOURCEDEPENDECYTEMPLATE.replace(
           '[[SOURCE_TYPE]]',
@@ -258,7 +273,7 @@ export class AppComponent implements OnInit {
             .indexOf(desDep.api.toLowerCase()) > 0) &&
         (!desDep.httpMethod ||
           desDep.httpMethod.toUpperCase() ===
-            apiRequest.request.method.toUpperCase())
+          apiRequest.request.method.toUpperCase())
       ) {
         let logic = DESTINATIONDEPENDECYTEMPLATE.replace(
           '[[DESTINATION_TYPE]]',
