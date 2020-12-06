@@ -1,7 +1,7 @@
 {
   "version": "0.0.1",
   "manifest_version": 2,
-  "name": "API Test Case Automation",
+  "name": "API Genie",
   "description": "Chrome extention to automate API test cases generation",
   "devtools_page": "devtoolsBackground.html",
   "permissions": ["tabs", "downloads", "storage"],
@@ -10,6 +10,6 @@
   },
   "browser_action": {
     "default_icon": "wifi_network.png",
-    "default_title": "API Test Case Automation"
+    "default_title": "API Genie"
   }
 }

@@ -3,7 +3,7 @@ var elementsPanel = panels && panels.elements;
 
 if (panels) {
   panels.create(
-    "API Automation",
+    "API Genie",
     "wifi_network.png",
     "index.html",
     function () {}
