@@ -22,7 +22,7 @@ import * as helper from './helper-extensions';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  constructor(private ngZone: NgZone) { }
+  constructor(private ngZone: NgZone) {}
 
   title = 'APIAutomation';
   getMethodTemplate: string = null;
@@ -60,6 +60,7 @@ export class AppComponent implements OnInit {
     );
 
     this.checkForTemplates();
+    this.templateValue = GETMETHODTEMPLATE;
 
     // subscribe to network request
     chrome.devtools.network.onRequestFinished.addListener(
@@ -107,9 +108,10 @@ export class AppComponent implements OnInit {
   }
 
   public templateTypeChange(templateType: string) {
-    chrome.storage.local.get([templateType], (result) => {
-      this[templateType] = result.key || this[templateType];
-    });
+    if (!templateType) {
+      return;
+    }
+    this.templateValue = this[templateType];
   }
 
   public saveTemplate(templateValue: string, templateType: string) {
@@ -127,7 +129,7 @@ export class AppComponent implements OnInit {
     request.selected = !request.selected;
     this.isAnyRequestSelected =
       this.apiRequests &&
-        this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0
+      this.apiRequests.filter((apiRequest) => apiRequest.selected).length > 0
         ? true
         : false;
   }
@@ -172,7 +174,7 @@ export class AppComponent implements OnInit {
       method = method.replace('[[Order]]', (i + 1).toString());
       const urlParts = apiRequest.request.url.split('/');
 
-      let testName: string = ''
+      let testName = '';
       for (let i = urlParts.length - 1; i >= 0; i--) {
         if (urlParts[i] !== '') {
           testName = urlParts[i];
@@ -251,7 +253,7 @@ export class AppComponent implements OnInit {
       if (
         srcDep.api === '*' ||
         apiRequest.request.url.toLowerCase().indexOf(srcDep.api.toLowerCase()) >
-        0
+          0
       ) {
         let logic = SOURCEDEPENDECYTEMPLATE.replace(
           '[[SOURCE_TYPE]]',
@@ -273,7 +275,7 @@ export class AppComponent implements OnInit {
             .indexOf(desDep.api.toLowerCase()) > 0) &&
         (!desDep.httpMethod ||
           desDep.httpMethod.toUpperCase() ===
-          apiRequest.request.method.toUpperCase())
+            apiRequest.request.method.toUpperCase())
       ) {
         let logic = DESTINATIONDEPENDECYTEMPLATE.replace(
           '[[DESTINATION_TYPE]]',
