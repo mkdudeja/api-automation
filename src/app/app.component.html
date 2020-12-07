@@ -74,12 +74,12 @@
           <div class="label">Dependencies configuration:</div>
           <textarea
             #configValueRef
-            [value]="dependencyDefs"
+            [value]="dependencyDefs | json"
             placeholder="Enter dependencies configuration here"
           ></textarea>
         </div>
         <div class="buttons-container">
-          <button (click)="saveConfig(configValueRef.value)">
+          <button>
             Save config
           </button>
         </div>

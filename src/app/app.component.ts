@@ -41,7 +41,6 @@ export class AppComponent implements OnInit {
   tabOptions: TabOptions[] = [
     { name: 'Templates', id: 'templates' },
     { name: 'Config', id: 'config' },
-    { name: 'Settings', id: 'settings' },
   ];
 
   hostname = null;
@@ -55,7 +54,7 @@ export class AppComponent implements OnInit {
       (tab: chrome.tabs.Tab) => {
         const location = new URL(tab.url);
         this.hostname = location.hostname;
-        this._initFromStorage();
+        // this._initFromStorage();
       }
     );
 
